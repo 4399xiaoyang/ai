@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Ai Demo</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<body>
+<h1> Hello My Ai Demo ! </h1>
+<div id="app">
+  <h1> 纠错 </h1>
+  <el-input
+          placeholder="请输入内容"
+          v-model="correct_input"
+          clearable>
+  </el-input>
+  <el-input
+          type="textarea"
+          :rows="5"
+          placeholder="识别结果"
+          v-model="correct_output">
+  </el-input>
+  <el-button type="primary" @click="correct_correction">纠错</el-button>
+
+  <h1> 图像识别 </h1>
+  <el-upload
+          class="upload-demo"
+          drag
+          action="http://127.0.0.1:8080/img"
+          :on-success="imgUploadFile"
+          multiple>
+    <i class="el-icon-upload"></i>
+    <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+    <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过5MB</div>
+  </el-upload>
+  <el-input
+          type="textarea"
+          :rows="2"
+          placeholder=" 图像识别的识别结果"
+          v-model="img_output">
+  </el-input>
+  <h1> 文字识别 </h1>
+  <el-upload
+          class="upload-demo"
+          drag
+          action="http://127.0.0.1:8080/text"
+          :on-success="textUploadFile"
+          multiple>
+    <i class="el-icon-upload"></i>
+    <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+    <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过5MB</div>
+  </el-upload>
+  <el-input
+          type="textarea"
+          :rows="8"
+          placeholder="识别结果"
+          v-model="text_output">
+  </el-input>
+  <el-button type="primary" @click="get_content">查询</el-button>
+  <el-table
+          :data="contentList"
+          style="width: 100%">
+    <el-table-column
+            prop="id"
+            label="主键"
+            width="180">
+    </el-table-column>
+    <el-table-column
+            prop="content"
+            label="内容"
+            width="300">
+    </el-table-column>
+    <el-table-column
+            prop="type"
+            label="类型"
+            width="180">
+    </el-table-column>
+    <el-table-column
+            prop="createTime"
+            label="创建时间"
+            width="180">
+    </el-table-column>
+    <el-table-column
+            prop="modifyTime"
+            label="更新时间"
+            width="180">
+    </el-table-column>
+    <el-table-column
+            align="right">
+      <template slot-scope="scope">
+        <el-button
+                size="mini"
+                type="danger"
+                @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+      </template>
+    </el-table-column>
+  </el-table>
+
+</div>
+
+</body>
+<!-- import Vue before Element -->
+<script src="https://cdn.bootcss.com/vue/2.5.16/vue.min.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+  new Vue({
+    el: '#app',
+    data: {
+      "correct_input":"",
+      "correct_output":"",
+      "img_output":"",
+      "text_output":"",
+      "contentList":""
+    },
+    methods:{
+      get_content(){
+        axios.get("http://127.0.0.1:8080/getAllContent",{
+        }).then(res=>{
+          this.contentList = res.data;
+          console.log(res.data);
+        })
+      },
+      handleDelete(index, row) {
+        console.log(index, row);
+        axios.delete("http://127.0.0.1:8080/deleteContent",{
+          params:{
+            id:row.id
+          }
+        }).then(res=>{
+          console.log(res.data);
+        });
+        this.get_content();
+      },
+      correct_correction(){
+        axios.get("http://127.0.0.1:8080/correct",{
+          params:{
+            text:this.correct_input
+          }
+        }).then(res=>{
+          this.correct_output = res.data;
+          console.log(res.data);
+        })
+      },
+      imgUploadFile(res,file){
+        console.log(res);
+        this.img_output = res;
+
+      },
+      textUploadFile(res,file){
+        console.log(res);
+        this.text_output = res;
+
+      }
+    }
+  })
+</script>
+</html>
