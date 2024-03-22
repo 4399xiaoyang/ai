@@ -136,7 +136,7 @@
       correct_correction(){
         axios.get("http://127.0.0.1:8080/correct",{
           params:{
-            text:this.correct_input
+            word:this.correct_input
           }
         }).then(res=>{
           this.correct_output = res.data;
